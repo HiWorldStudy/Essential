@@ -2,7 +2,7 @@ import { NewsFeed, NewsDetail } from '../types';
 import { NEWS_URL, CONTENT_URL } from '../config';
 
 
-function applyApiMixins(targetClass: any, baseClasses: any[]): void {
+export function applyApiMixins(targetClass: any, baseClasses: any[]): void {
   baseClasses.forEach(baseClass => {
     Object.getOwnPropertyNames(baseClass.prototype).forEach(name=> {
       const descriptor = Object.getOwnPropertyDescriptor(baseClass.prototype, name);
@@ -16,30 +16,47 @@ function applyApiMixins(targetClass: any, baseClasses: any[]): void {
 
 
 export class Api {
-  getRequest<AjaxResponse>(url: string, cb: (data:AjaxResponse)=>void): void {
-    const ajax = new XMLHttpRequest();
-    ajax.open('GET', url);
-    ajax.addEventListener('load', () => {
-      cb(JSON.parse(ajax.response) as AjaxResponse);
+  getRequestWithXHR<AjaxResponse>(url: string, cb: (data:AjaxResponse)=>void): void {
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', url);
+    xhr.addEventListener('load', () => {
+      cb(JSON.parse(xhr.response) as AjaxResponse);
     });
-    ajax.send();
+    xhr.send();
+  }
+
+  getRequestWithPromise<AjaxResponse>(url: string, cb: (data:AjaxResponse)=>void): void {
+    fetch(url)
+    .then(response => response.json())
+    .then(cb)
+    .catch(() => {
+        console.error('데이터를 불러오는데 실패했습니다.');
+    });
   }
 }
 
 export class NewsFeedApi{
-  getData(cb: (data:NewsFeed[])=>void): void {
-    return this.getRequest<NewsFeed[]>(NEWS_URL, cb);
+  getDataWithXHR(cb: (data:NewsFeed[])=>void): void {
+    return this.getRequestWithXHR<NewsFeed[]>(NEWS_URL, cb);
+  }
+
+  getDataWithPromise(cb: (data:NewsFeed[])=>void): void {
+    return this.getRequestWithPromise<NewsFeed[]>(NEWS_URL, cb);
   }
 }
 
 export class NewsDetailApi {
-  getData(id: string, cb: (data:NewsDetail)=>void): void {
-    return this.getRequest<NewsDetail>(CONTENT_URL.replace('@id', id), cb);
+  getDataWithXHR(id: string, cb: (data:NewsDetail)=>void): void {
+    return this.getRequestWithXHR<NewsDetail>(CONTENT_URL.replace('@id', id), cb);
+  }
+
+  getDataWithPromise(id: string, cb: (data:NewsDetail)=>void): void {
+    this.getRequestWithPromise<NewsDetail>(CONTENT_URL.replace('@id', id), cb);
   }
 }
 
 export interface NewsFeedApi extends Api {};
 export interface NewsDetailApi extends Api {};
 
-applyApiMixins(NewsFeedApi, [Api]);
-applyApiMixins(NewsDetailApi, [Api]);
+//applyApiMixins(NewsFeedApi, [Api]);
+//applyApiMixins(NewsDetailApi, [Api]);
