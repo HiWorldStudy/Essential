@@ -1,0 +1,4 @@
+parcel index.html
+
+html의 구조를 알수 없으니 dom api를 사용하지 않고 innerHTML을 사용해서 코딩
+dom api를 없애는게 맞나?
