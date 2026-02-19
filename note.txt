@@ -2,3 +2,29 @@ parcel index.html
 
 html의 구조를 알수 없으니 dom api를 사용하지 않고 innerHTML을 사용해서 코딩
 dom api를 없애는게 맞나?
+
+Generic : <T>
+함수에서 여러 type으로 return을 할 때 호출하는 함수에서 type을 설정하여 함수를 호출할 수 있도록 해주는 기능
+
+type / interface
+type aa = {         // =을 입력해야함
+
+}
+
+type aa = bb & {    // 다른 타입을 결합하여 사용 가능
+
+}
+
+============================================
+interface aa {      // = 없이 사용
+
+}
+타입 결합이 불가능
+
+interface aa extends bb {      // 다른 interface를 상속? 확장 
+
+}
+// 코드를 읽기 좋음
+// | (union type)사용 불가
+
+readonly : 내부 변수 앞에 선언시 변경불가 (const?)

@@ -1,30 +1,30 @@
-type Store = {
+interface Store {
   currentPage: number;
   feeds : NewsFeed[];
 }
 
-type News = {
-  id: number;
-  time_ago: string;
-  title: string;
-  url: string;
-  user: string;
-  content: string;
+interface News {
+  readonly id: number;
+  readonly time_ago: string;
+  readonly title: string;
+  readonly url: string;
+  readonly user: string;
+  readonly content: string;
 }
 
-type NewsFeed = News & {
-  comments_count: number;
-  points: number;
+interface NewsFeed extends News {
+  readonly comments_count: number;
+  readonly points: number;
   read?: boolean;
 }
 
-type NewsDetail = News & {
-  comments: NewsCommnet[];
+interface NewsDetail extends News {
+  readonly comments: NewsCommnet[];
 }
 
-type NewsCommnet = News & {
-  comments: NewsCommnet[];
-  level: number;
+interface NewsCommnet extends News {
+  readonly comments: NewsCommnet[];
+  readonly level: number;
 }
 
 const ajax: XMLHttpRequest = new XMLHttpRequest();
@@ -37,11 +37,33 @@ const store: Store = {
     feeds: [],
 };
 
-function getData<AjaxResponse>(url: string): AjaxResponse {
-    ajax.open('GET', url, false);
-    ajax.send();
+class Api {
+  url: string;
+  ajax: XMLHttpRequest;
 
-    return JSON.parse(ajax.response);
+  constructor(url: string) {
+    this.url = url;
+    this.ajax = new XMLHttpRequest();
+  }
+
+  protected getRequest<AjaxResponse>(): AjaxResponse {
+    this.ajax.open('GET', this.url, false);
+    this.ajax.send();
+
+    return JSON.parse(this.ajax.response);
+  }
+}
+
+class NewsFeedApi extends Api {
+  getData(): NewsFeed[] {
+    return this.getRequest<NewsFeed[]>();
+  }
+}
+
+class NewsDetailApi extends Api {
+  getData(): NewsDetail {
+    return this.getRequest<NewsDetail>();
+  }
 }
 
 function makeFeeds(feeds: NewsFeed[]): NewsFeed[] {
@@ -87,8 +109,9 @@ function newsFeed(): void {
     </div>
   `;
 
+  const api = new NewsFeedApi(NEWS_URL);
     if(newsFeed.length === 0){
-        newsFeed = store.feeds = makeFeeds(getData<NewsFeed[]>(NEWS_URL));
+        newsFeed = store.feeds = makeFeeds(api.getData());
     }
     const pageCount = newsFeed.length / 10;
 
@@ -124,7 +147,8 @@ function newsFeed(): void {
 
 function newsDetail(): void {
     const id = location.hash.substring(7);
-    const newsContent = getData<NewsDetail>(CONTENT_URL.replace(`@id`, id));
+    const api = new NewsDetailApi(CONTENT_URL.replace(`@id`, id));
+    const newsContent = api.getData();
     let template = `
     <div class="bg-gray-600 min-h-screen pb-8">
       <div class="bg-white text-xl">
