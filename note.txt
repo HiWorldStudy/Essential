@@ -28,3 +28,9 @@ interface aa extends bb {      // 다른 interface를 상속? 확장
 // | (union type)사용 불가
 
 readonly : 내부 변수 앞에 선언시 변경불가 (const?)
+
+
+Mixins(믹스인)
+extends 
+-> 코드에 적시되어야 사용할 수 있는 방법 : 코드를 직접 바꿔야 사용 가능
+-> 다중상속을 지원하지 않음
