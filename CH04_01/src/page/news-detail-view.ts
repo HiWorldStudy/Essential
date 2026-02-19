@@ -38,11 +38,10 @@ export default class NewsDetailView extends View {
         this.store = store;
     }
 
-  render() : void{
+  render = async () : Promise<void> =>{
     const id = location.hash.substring(7);
     const api = new NewsDetailApi();
-    api.getDataWithPromise(id, (data:NewsDetail) => {
-        const newsContent = data;
+    const newsContent = await api.getData(id);
         this.store.makeRead(Number(id));
         
         this.setTemplateData('comments', this.makeComment(newsContent.comments));
@@ -50,7 +49,6 @@ export default class NewsDetailView extends View {
         this.setTemplateData('title', newsContent.title);
         this.setTemplateData('content', newsContent.content);
         this.updateView();
-    });
     
   }
 

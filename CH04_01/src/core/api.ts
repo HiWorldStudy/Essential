@@ -16,42 +16,21 @@ export function applyApiMixins(targetClass: any, baseClasses: any[]): void {
 
 
 export class Api {
-  getRequestWithXHR<AjaxResponse>(url: string, cb: (data:AjaxResponse)=>void): void {
-    const xhr = new XMLHttpRequest();
-    xhr.open('GET', url);
-    xhr.addEventListener('load', () => {
-      cb(JSON.parse(xhr.response) as AjaxResponse);
-    });
-    xhr.send();
-  }
-
-  getRequestWithPromise<AjaxResponse>(url: string, cb: (data:AjaxResponse)=>void): void {
-    fetch(url)
-    .then(response => response.json())
-    .then(cb)
-    .catch(() => {
-        console.error('데이터를 불러오는데 실패했습니다.');
-    });
+  async request<AjaxResponse>(url: string): Promise<AjaxResponse> {
+    const response = await fetch(url);
+    return await response.json() as AjaxResponse;
   }
 }
 
 export class NewsFeedApi{
-  getDataWithXHR(cb: (data:NewsFeed[])=>void): void {
-    return this.getRequestWithXHR<NewsFeed[]>(NEWS_URL, cb);
-  }
-
-  getDataWithPromise(cb: (data:NewsFeed[])=>void): void {
-    return this.getRequestWithPromise<NewsFeed[]>(NEWS_URL, cb);
+  async getData(): Promise<NewsFeed[]> {
+    return this.request<NewsFeed[]>(NEWS_URL);
   }
 }
 
 export class NewsDetailApi {
-  getDataWithXHR(id: string, cb: (data:NewsDetail)=>void): void {
-    return this.getRequestWithXHR<NewsDetail>(CONTENT_URL.replace('@id', id), cb);
-  }
-
-  getDataWithPromise(id: string, cb: (data:NewsDetail)=>void): void {
-    this.getRequestWithPromise<NewsDetail>(CONTENT_URL.replace('@id', id), cb);
+  async getData(id: string): Promise<NewsDetail> {
+    return this.request<NewsDetail>(CONTENT_URL.replace('@id', id));
   }
 }
 
